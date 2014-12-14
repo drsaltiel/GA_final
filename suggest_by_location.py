@@ -40,22 +40,27 @@ def find_optimal_bus(latitude, longitude, radius, metric,
     results.sort(key=lambda pair: pair[1], reverse=True)
         
     return results[:num_results]
-    
-def max_traffic_percent(lat,lon,category,radius, city):
+   
+def traffic_percent(lat,lon,category,radius,city):
     '''
-    metric of maximum percent of traffic
+    returns percent traffic of category surrounding lat and lon in radius
     '''
     cat_rev, total_rev = review_count_radius(lat, lon, category, radius, city)
     cat_percent = float(cat_rev) / total_rev
     return cat_percent
 
+def max_traffic_percent(lat,lon,category,radius, city):
+    '''
+    metric of maximum percent of traffic
+    '''
+    return traffic_percent(lat, lon, category, radius, city)
+
 def min_traffic_percent(lat,lon,category,radius, city):
     '''
     metric of minimum percent of traffic
+    returns traffic percent of NOT category
     '''
-    cat_rev, total_rev = review_count_radius(lat, lon, category, radius, city)
-    cat_percent = float(cat_rev) / total_rev
-    return 1-cat_percent
+    return 1-traffic_percent(lat, lon, category, radius, city)
 
 def review_count_radius(lat, lon, category, radius, city):
     '''
