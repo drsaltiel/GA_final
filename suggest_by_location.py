@@ -7,7 +7,7 @@ possible_categories = list all possible categories divided by commas (no spaces)
 Needs input of latitude and longitude, defaults:
 radius = 1 mile
 metric = maximum traffic (reviews) percent
-num_results = results for all categories
+num_results = top 10 results
 city = Las Vegas
 '''
 
@@ -18,8 +18,8 @@ import math as math
 import sys
 
 
-def find_optimal_bus(latitude, longitude, radius, metric, 
-                     possible_categories=None, num_results=None, city='Las Vegas'):
+def find_optimal_bus(latitude, longitude, radius, metric='combined_metric', 
+                     possible_categories=None, num_results=10, city='Las Vegas'):
     '''
     takes in a coordinate location and finds what category of business 
     from possible_categories would be best there according to metric
@@ -35,12 +35,27 @@ def find_optimal_bus(latitude, longitude, radius, metric,
     if num_results==None:
         num_results = len(possible_categories)
     
-    results = [(cat, metric(latitude, longitude,cat, radius, city_data)) \
-               for cat in possible_categories]
-    results.sort(key=lambda pair: pair[1], reverse=True)
+    if metric == 'combined_metric':
+        results_traffic = [(cat, max_traffic_percent(latitude,longitude,cat,radius,city_data)) \
+                           for cat in possible_categories]
+        results_traffic.sort(key=lambda pair: pair[1], reverse=True)
+        results_traffic = [cat for cat, _ in results_traffic]
+        results_neighbors = [(cat, min_neighbors(latitude,longitude,cat,radius,city_data)) \
+                             for cat in possible_categories]
+        results_neighbors.sort(key=lambda pair: pair[1], reverse=True)
+        results_neighbors = [cat for cat, _ in results_neighbors]
+        results = [(cat, results_traffic.index(cat)+results_neighbors.index(cat)) \
+                   for cat in possible_categories]
+        results.sort(key=lambda pair: pair[1])
+
+    else:
+        results = [(cat, metric(latitude, longitude,cat, radius, city_data)) \
+                   for cat in possible_categories]
+        results.sort(key=lambda pair: pair[1], reverse=True)
         
     return results[:num_results]
-   
+
+
 def traffic_percent(lat,lon,category,radius,city):
     '''
     returns percent traffic of category surrounding lat and lon in radius
@@ -62,9 +77,37 @@ def min_traffic_percent(lat,lon,category,radius, city):
     '''
     return 1-traffic_percent(lat, lon, category, radius, city)
 
+def min_neighbors(lat,lon,category,radius, city):
+    '''
+    metric of minimum number of neighbors of same category
+    '''
+    cat_bus, total_bus = neighbor_radius(lat,lon,category,radius,city)
+    return -(float(cat_bus)/total_bus)
+
+def neighbor_radius(lat,lon,category,radius,city):
+    '''
+    returns category businesses and total businesses within radius
+    '''
+    lat_bus = lat
+    lon_bus = lon
+    category_bus = 0
+    total_bus = 0
+    for i, bus in city['categories'].iteritems():
+        lat = city['latitude'][i]
+        lon = city['longitude'][i]
+        
+        if radius < coord_distance((lon_bus,lat_bus),(lon,lat)):
+            total_bus  +=1
+            if category in bus:
+                category_bus+=1
+    
+    return category_bus, total_bus
+
+
 def review_count_radius(lat, lon, category, radius, city):
     '''
-    returns category businesses and total businesses within radius in miles
+    returns category businesses and total businesses reviews 
+    within radius in miles
     '''
     lat_bus = lat
     lon_bus = lon
@@ -108,21 +151,25 @@ def main(latitude, longitude):
                            radius = 1, 
                            metric = metric, 
                            possible_categories=categories, 
-                           num_results=None, 
+                           num_results=10, 
                            city='Las Vegas')
     for element in suggestions:
         print element 
 
-metric_map = {"max": max_traffic_percent,
-              "min": min_traffic_percent,
+metric_map = {"max_traffic": max_traffic_percent,
+              "min_traffic": min_traffic_percent,
               "percent": max_traffic_percent,
-              "percent_not": min_traffic_percent}
+              "percent_not": min_traffic_percent,
+              "min_neighbors": min_neighbors,
+              "combined": "combined_metric"}
 
 
 if __name__ == '__main__':
     lat = float(sys.argv[1])
     lon = float(sys.argv[2])
     categories = sys.argv[3].split(',')
+    if categories == ['None'] or categories == ['none']:
+        categories = None
     try: 
         metric = metric_map[sys.argv[4]]
     except IndexError:
