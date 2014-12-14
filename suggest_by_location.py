@@ -49,7 +49,7 @@ def find_optimal_bus(latitude, longitude, radius, metric='combined_metric',
         results.sort(key=lambda pair: pair[1])
 
     else:
-        results = [(cat, metric(latitude, longitude,cat, radius, city_data)) \
+        results = [(cat, metric(latitude,longitude,cat,radius,city_data)) \
                    for cat in possible_categories]
         results.sort(key=lambda pair: pair[1], reverse=True)
         
@@ -147,12 +147,12 @@ def coord_distance(point1, point2, scale='miles'):
 
 def main(latitude, longitude):
     suggestions = find_optimal_bus(latitude, 
-                           longitude, 
-                           radius = 1, 
-                           metric = metric, 
-                           possible_categories=categories, 
-                           num_results=10, 
-                           city='Las Vegas')
+                                   longitude, 
+                                   radius = 1, 
+                                   metric = metric, 
+                                   possible_categories=categories, 
+                                   num_results=10, 
+                                   city='Las Vegas')
     for element in suggestions:
         print element 
 
@@ -173,7 +173,7 @@ if __name__ == '__main__':
     try: 
         metric = metric_map[sys.argv[4]]
     except IndexError:
-        metric = max_traffic_percent
+        metric = metric_map['combined']
     except KeyError:
         print "invalid metric entered"
         sys.exit(1)
