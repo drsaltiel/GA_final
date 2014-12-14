@@ -2,10 +2,11 @@
 Returns the optimal business for a given location based upon surrounding businesses
 within a specified radius.
 
+possible_categories = list all possible categories divided by commas (no spaces)
+
 Needs input of latitude and longitude, defaults:
 radius = 1 mile
 metric = maximum traffic (reviews) percent
-possible_categories = all possible categories
 num_results = results for all categories
 city = Las Vegas
 '''
@@ -101,13 +102,15 @@ def main(latitude, longitude):
                            longitude, 
                            radius = 1, 
                            metric = max_traffic_percent, 
-                           possible_categories=None, 
+                           possible_categories=categories, 
                            num_results=None, 
                            city='Las Vegas')
-    return suggestions
+    for element in suggestions:
+        print element 
 
 
 if __name__ == '__main__':
-    lat = sys.argv[1]
-    lon = sys.argv[2]
+    lat = float(sys.argv[1])
+    lon = float(sys.argv[2])
+    categories = sys.argv[3].split(',')
     main(lat, lon)
