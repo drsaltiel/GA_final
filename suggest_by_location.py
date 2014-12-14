@@ -55,7 +55,7 @@ def min_traffic_percent(lat,lon,category,radius, city):
     '''
     cat_rev, total_rev = review_count_radius(lat, lon, category, radius, city)
     cat_percent = float(cat_rev) / total_rev
-    return -cat_percent
+    return 1-cat_percent
 
 def review_count_radius(lat, lon, category, radius, city):
     '''
@@ -101,16 +101,30 @@ def main(latitude, longitude):
     suggestions = find_optimal_bus(latitude, 
                            longitude, 
                            radius = 1, 
-                           metric = max_traffic_percent, 
+                           metric = metric, 
                            possible_categories=categories, 
                            num_results=None, 
                            city='Las Vegas')
     for element in suggestions:
         print element 
 
+metric_map = {"max": max_traffic_percent,
+              "min": min_traffic_percent,
+              "percent": max_traffic_percent,
+              "percent_not": min_traffic_percent}
+
 
 if __name__ == '__main__':
     lat = float(sys.argv[1])
     lon = float(sys.argv[2])
     categories = sys.argv[3].split(',')
+    try: 
+        metric = metric_map[sys.argv[4]]
+    except IndexError:
+        metric = max_traffic_percent
+    except KeyError:
+        print "invalid metric entered"
+        sys.exit(1)
+
     main(lat, lon)
+
