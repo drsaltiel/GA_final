@@ -56,26 +56,13 @@ def find_optimal_bus(latitude, longitude, radius, metric='combined_metric',
     return results[:num_results]
 
 
-def traffic_percent(lat,lon,category,radius,city):
+def max_traffic_percent(lat,lon,category,radius,city):
     '''
     returns percent traffic of category surrounding lat and lon in radius
     '''
     cat_rev, total_rev = review_count_radius(lat, lon, category, radius, city)
     cat_percent = float(cat_rev) / total_rev
     return cat_percent
-
-def max_traffic_percent(lat,lon,category,radius, city):
-    '''
-    metric of maximum percent of traffic
-    '''
-    return traffic_percent(lat, lon, category, radius, city)
-
-def min_traffic_percent(lat,lon,category,radius, city):
-    '''
-    metric of minimum percent of traffic
-    returns traffic percent of NOT category
-    '''
-    return 1-traffic_percent(lat, lon, category, radius, city)
 
 def min_neighbors(lat,lon,category,radius, city):
     '''
@@ -157,9 +144,7 @@ def main(latitude, longitude):
         print element 
 
 metric_map = {"max_traffic": max_traffic_percent,
-              "min_traffic": min_traffic_percent,
-              "percent": max_traffic_percent,
-              "percent_not": min_traffic_percent,
+              "traffic_percent": max_traffic_percent,
               "min_neighbors": min_neighbors,
               "combined": "combined_metric"}
 
