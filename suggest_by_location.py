@@ -4,9 +4,9 @@ within a specified radius.
 
 possible_categories = list all possible categories divided by commas (no spaces)
 
-Needs input of latitude and longitude, defaults:
+Needs input of latitude and longitude and possible_categories, defaults:
 radius = 1 mile
-metric = maximum traffic (reviews) percent
+metric = combined metrics
 num_results = top 10 results
 city = Las Vegas
 '''
