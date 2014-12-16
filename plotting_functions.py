@@ -154,3 +154,52 @@ def plot_percent_traffic(category, num_bins, city):
     cb = plt.colorbar() #make color bar
     cb.set_ticks([0,max_ratio])   #two ticks
     cb.set_ticklabels(['low traffic','lots of traffic'])  # put text labels on them
+
+from matplotlib import collections  as mc
+def plot_nearest(category, city_data):
+    '''
+    plots businessess of given category in given city with lines connecting every business to the closest of the same type
+    '''
+    category_businesses = city_data[[category in j for i, j in city_data['categories'].iteritems()]]
+    category_bus_coordinates = []
+    for k, l in category_businesses['latitude'].iteritems():
+        category_bus_coordinates.append((category_businesses['longitude'][k], category_businesses['latitude'][k]))
+    lines = []
+    for coord in category_bus_coordinates:
+        min_coord = float('inf')
+        min_distance = float('inf')
+        for cat_bus in category_bus_coordinates:
+            if cat_bus!= coord:
+                dist = coord_distance(coord, cat_bus)
+                if dist < min_distance:
+                    min_distance = dist
+                    min_coord = cat_bus
+        lines.append([coord, min_coord])
+#     return lines
+    lc = mc.LineCollection(lines)
+    plt.figure()
+    ax = plt.subplot(111)
+    ax.add_collection(lc)
+    ax.autoscale()
+    ax.margins(0.1)
+
+def coord_distance(point1, point2, scale='miles'):
+    '''
+    finds the distance between two coordinate locations given as
+    (longitude, latitude)
+    uses Haversine formula
+    '''
+    if len(point1) != 2 or len(point2) != 2:
+        raise ValueError('Input(s) do not have correct dimensions')
+    if scale == 'miles': 
+        R = 3963
+    elif scale == 'kilometers': 
+        R = 6373
+    else: 
+        raise ValueError('Need valid scale (miles or kilometers)')
+    dLat = (point1[1] - point2[1]) * np.pi / 180
+    dLong = (point1[0] - point2[0]) * np.pi / 180
+    a = np.sin(dLat / 2) * np.sin(dLat / 2) + np.cos(point1[1] * np.pi / 180) \
+        * np.cos(point2[1] * np.pi / 180) * np.sin(dLong / 2) * np.sin(dLong / 2)
+    c = 2 * math.atan2(np.sqrt(a), np.sqrt(1 - a))
+    return R*c
