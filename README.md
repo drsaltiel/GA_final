@@ -25,4 +25,4 @@ Files are:
 
 * suggest_by_location.py - MAIN SCRIPT - script which takes input of latitude and longitude for location, along with possible business categories, and returns optimal business category.  Main result of project
 
-*GAfinal_powerpoint.pdf - final powerpoint presentation of results, presented on the last day of class
+* GAfinal_powerpoint.pdf - final powerpoint presentation of results, presented on the last day of class
